@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bytom-spv/addresscallbacks"
+
 	"github.com/kr/secureheader"
 	log "github.com/sirupsen/logrus"
 	cmn "github.com/tendermint/tmlibs/common"
@@ -109,6 +111,7 @@ type API struct {
 	server        *http.Server
 	handler       http.Handler
 	txFeedTracker *txfeed.Tracker
+	callbackStore *addresscallbacks.CallbackStore
 }
 
 func (a *API) initServer(config *cfg.Config) {
@@ -165,13 +168,14 @@ func (a *API) StartServer(address string) {
 }
 
 // NewAPI create and initialize the API
-func NewAPI(sync *netsync.SyncManager, wallet *wallet.Wallet, txfeeds *txfeed.Tracker, chain *protocol.Chain, config *cfg.Config, token *accesstoken.CredentialStore) *API {
+func NewAPI(sync *netsync.SyncManager, wallet *wallet.Wallet, txfeeds *txfeed.Tracker, chain *protocol.Chain, config *cfg.Config, token *accesstoken.CredentialStore, cbStore *addresscallbacks.CallbackStore) *API {
 	api := &API{
 		sync:          sync,
 		wallet:        wallet,
 		chain:         chain,
 		accessTokens:  token,
 		txFeedTracker: txfeeds,
+		callbackStore: cbStore,
 	}
 	api.buildHandler()
 	api.initServer(config)
@@ -198,6 +202,10 @@ func (a *API) buildHandler() {
 		m.Handle("/list-addresses", jsonHandler(a.listAddresses))
 		m.Handle("/validate-address", jsonHandler(a.validateAddress))
 		m.Handle("/list-pubkeys", jsonHandler(a.listPubKeys))
+
+		m.Handle("/add-address-callback", jsonHandler(a.addAddressCallback))
+		m.Handle("/list-address-callbacks", jsonHandler(a.listAddressCallbacks))
+		m.Handle("/remove-address-callback", jsonHandler(a.removeAddressCallback))
 
 		m.Handle("/get-mining-address", jsonHandler(a.getMiningAddress))
 		m.Handle("/set-mining-address", jsonHandler(a.setMiningAddress))

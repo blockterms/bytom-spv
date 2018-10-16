@@ -119,6 +119,10 @@ func AddCommands() {
 	BytomcliCmd.AddCommand(validateAddressCmd)
 	BytomcliCmd.AddCommand(listPubKeysCmd)
 
+	BytomcliCmd.AddCommand(addAddressCallbackCmd)
+	BytomcliCmd.AddCommand(listAddressCallbacksCmd)
+	BytomcliCmd.AddCommand(removeAddressCallbackCmd)
+
 	BytomcliCmd.AddCommand(createAssetCmd)
 	BytomcliCmd.AddCommand(getAssetCmd)
 	BytomcliCmd.AddCommand(listAssetsCmd)

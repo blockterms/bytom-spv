@@ -17,6 +17,7 @@ import (
 
 	"github.com/bytom-spv/accesstoken"
 	"github.com/bytom-spv/account"
+	"github.com/bytom-spv/addresscallbacks"
 	"github.com/bytom-spv/api"
 	"github.com/bytom-spv/asset"
 	"github.com/bytom-spv/blockchain/pseudohsm"
@@ -45,12 +46,13 @@ type Node struct {
 
 	syncManager *netsync.SyncManager
 
-	wallet       *w.Wallet
-	accessTokens *accesstoken.CredentialStore
-	api          *api.API
-	chain        *protocol.Chain
-	txfeed       *txfeed.Tracker
-	miningEnable bool
+	wallet        *w.Wallet
+	accessTokens  *accesstoken.CredentialStore
+	api           *api.API
+	chain         *protocol.Chain
+	txfeed        *txfeed.Tracker
+	miningEnable  bool
+	callbackStore *addresscallbacks.CallbackStore
 }
 
 func NewNode(config *cfg.Config) *Node {
@@ -66,6 +68,9 @@ func NewNode(config *cfg.Config) *Node {
 
 	tokenDB := dbm.NewDB("accesstoken", config.DBBackend, config.DBDir())
 	accessTokens := accesstoken.NewStore(tokenDB)
+
+	callbackDB := dbm.NewDB("callbacks", config.DBBackend, config.DBDir())
+	callbackStore := addresscallbacks.NewStore(callbackDB)
 
 	chain, err := protocol.NewChain(store)
 	if err != nil {
@@ -118,13 +123,14 @@ func NewNode(config *cfg.Config) *Node {
 	}
 
 	node := &Node{
-		config:       config,
-		syncManager:  syncManager,
-		accessTokens: accessTokens,
-		wallet:       wallet,
-		chain:        chain,
-		txfeed:       txFeed,
-		miningEnable: config.Mining,
+		config:        config,
+		syncManager:   syncManager,
+		accessTokens:  accessTokens,
+		wallet:        wallet,
+		chain:         chain,
+		txfeed:        txFeed,
+		miningEnable:  config.Mining,
+		callbackStore: callbackStore,
 	}
 
 	node.BaseService = *cmn.NewBaseService(nil, "Node", node)
@@ -178,7 +184,7 @@ func launchWebBrowser(port string) {
 }
 
 func (n *Node) initAndstartApiServer() {
-	n.api = api.NewAPI(n.syncManager, n.wallet, n.txfeed, n.chain, n.config, n.accessTokens)
+	n.api = api.NewAPI(n.syncManager, n.wallet, n.txfeed, n.chain, n.config, n.accessTokens, n.callbackStore)
 
 	listenAddr := env.String("LISTEN", n.config.ApiAddress)
 	env.Parse()

@@ -86,6 +86,13 @@ Thank you for considering helping out with the source code! Any contributions ar
 
 If you run into an issue, feel free to [bytom issues](https://github.com/bytom-spv/bytom/issues/) in this repository. We are glad to help!
 
+## added address callback features
+Added 3 new APIS 
+POST /add-address-callback {"address":"bytom address", "url":"a url which needs to be called back"}
+POST /list-address-callbacks {"address":"bytom address"}
+POST /remove-address-callback {"address":"bytom address", "url":"a url that needs to be removed from getting called back"}
+
+[WIP] Actual part of calling back is still work in progress
 ## License
 
 [AGPL v3](./LICENSE)

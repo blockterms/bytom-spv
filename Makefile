@@ -17,12 +17,17 @@ BUILD_FLAGS := -ldflags "-X github.com/bytom-spv/version.GitCommit=`git rev-pars
 BYTOM_SPV_BINARY32 := bytom-spv-wallet-$(GOOS)_386
 BYTOM_SPV_BINARY64 := bytomd-spv-wallet-$(GOOS)_amd64
 
+BYTOMCLI_BINARY32 := bytomcli-$(GOOS)_386
+BYTOMCLI_BINARY64 := bytomcli-$(GOOS)_amd64
+
 VERSION := $(shell awk -F= '/Version =/ {print $$2}' version/version.go | tr -d "\" ")
 
 
 BYTOM_SPV_RELEASE32 := bytom-$(VERSION)-$(GOOS)_386
 BYTOM_SPV_RELEASE64 := bytom-$(VERSION)-$(GOOS)_amd64
 
+BYTOMCLI_RELEASE32 := bytomcli-$(VERSION)-$(GOOS)_386
+BYTOMCLI_RELEASE64 := bytomcli-$(VERSION)-$(GOOS)_amd64
 
 all: test target release-all
 
@@ -30,6 +35,10 @@ bytom-spv:
 	@echo "Building bytom-spv-wallet to cmd/bytomd/bytom-spv-wallet"
 	@go build $(BUILD_FLAGS) -o cmd/bytomd/bytom-spv-wallet cmd/bytomd/main.go
 
+bytomcli:
+	@echo "Building bytomcli to cmd/bytomcli/bytomcli"
+	@go build $(BUILD_FLAGS) -o cmd/bytomcli/bytomcli cmd/bytomcli/main.go
+	
 target:
 	mkdir -p $@
 
